@@ -48,7 +48,37 @@ struct FetchedPokemon {
     
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.id = try container.decode(Int16.self, forKey: .id)
-        self.name = try container.decode(String.self, forKey: .name)
+        
+        id = try container.decode(Int16.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        
+        var decodedTypes: [String] = []
+        var typesContainter = try container.nestedUnkeyedContainer(forKey: .types)
+        while !typesContainter.isAtEnd {
+            let typesDictionaryContainer = try typesContainter.nestedContainer(keyedBy: CodingKeys.TypeDictionaryKeys.self)
+            let typeContainer = try typesDictionaryContainer.nestedContainer(keyedBy: CodingKeys.TypeDictionaryKeys.TypeKeys.self, forKey: .type)
+            let type = try typeContainer.decode(String.self, forKey: .name)
+            decodedTypes.append(type)
+        }
+        types = decodedTypes
+        
+        var decodedStats: [Int16] = []
+        var statsContainer = try container.nestedUnkeyedContainer(forKey: .stats)
+        while !statsContainer.isAtEnd {
+            let statsDictionaryContainer = try statsContainer.nestedContainer(keyedBy: CodingKeys.StatDictionaryKeys.self)
+            let stat = try statsDictionaryContainer.decode(Int16.self, forKey: .baseStat)
+            decodedStats.append(stat)
+        }
+        
+        hp = decodedStats[0]
+        attack = decodedStats[1]
+        defence = decodedStats[2]
+        specialAttack = decodedStats[3]
+        specialDefence = decodedStats[4]
+        speed = decodedStats[5]
+        
+        let spritesContainer = try container.nestedContainer(keyedBy: CodingKeys.SpriteKeys.self, forKey: .sprites)
+        sprite = try spritesContainer.decode(URL.self, forKey: .sprite)
+        shiny = try spritesContainer.decode(URL.self, forKey: .shiny)
     }
 }
