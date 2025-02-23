@@ -7,7 +7,7 @@
 import Foundation
 
 
-struct FetchedPokemon {
+struct FetchedPokemon: Decodable {
     let id: Int16
     let name: String
     let types: [String]
@@ -40,7 +40,7 @@ struct FetchedPokemon {
         }
         
         enum SpriteKeys: String, CodingKey {
-            case sprite = "frontDefauls"
+            case sprite = "frontDefault"
             case shiny = "frontShiny"
             
         }
