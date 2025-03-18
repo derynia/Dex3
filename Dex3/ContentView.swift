@@ -16,6 +16,11 @@ struct ContentView: View {
         animation: .default
     ) private var pokedex
     
+    @FetchRequest<Pokemon>(
+        sortDescriptors: [],
+        animation: .default
+    ) private var all
+    
     @State private var searchText = ""
     @State private var filterByFavorites = false
     
@@ -38,7 +43,7 @@ struct ContentView: View {
     }
 
     var body: some View {
-        if (pokedex.isEmpty) {
+        if (all.isEmpty) {
             ContentUnavailableView {
                 Label("No pokemon", image: .nopokemon)
             } description: {
@@ -88,11 +93,24 @@ struct ContentView: View {
                                         }
                                     }
                                 }
-                                
+                            }
+                            .swipeActions(edge: .leading) {
+                                Button(
+                                    pokemon.favorite ? "Remove from favorites" : "Add to favorites",
+                                    systemImage: "star"
+                                ) {
+                                    pokemon.favorite.toggle()
+                                    do {
+                                        try viewContext.save()
+                                    } catch {
+                                        print(error)
+                                    }
+                                }
+                                .tint(pokemon.favorite ? .gray : .yellow)
                             }
                         }
                     } footer: {
-                        if pokedex.count < 151 {
+                        if all.count < 151 {
                             ContentUnavailableView {
                                 Label("Mission Pokemon", image: .nopokemon)
                             } description: {
@@ -129,6 +147,7 @@ struct ContentView: View {
                     }
                 }
             }
+
         }
     }
     
@@ -150,10 +169,6 @@ struct ContentView: View {
                     pokemon.speed = fetchedPokemon.speed
                     pokemon.sprite = fetchedPokemon.sprite
                     pokemon.shiny = fetchedPokemon.shiny
-                    
-                    if pokemon.id % 2 == 0 {
-                        pokemon.favorite = true
-                    }
                     
                     try viewContext.save()
                 } catch {
