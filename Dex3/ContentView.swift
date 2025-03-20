@@ -11,23 +11,25 @@ import SwiftData
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Pokemon.id, animation: .default) private var pokedex: [Pokemon]
-
+    
     @State private var searchText = ""
     @State private var filterByFavorites = false
-    
+    @State private var selectedType: String = "All"
+
+    var uniqueTypes: [String] {
+        var typesSet = Set(pokedex.flatMap { $0.types }).sorted()
+        typesSet.insert("All", at: 0)
+        
+        return typesSet
+    }
+
     let fetcher = FetchService()
     
     private var dynamicPredicate: Predicate<Pokemon> {
         #Predicate<Pokemon> { pokemon in
-            if filterByFavorites && !searchText.isEmpty {
-                pokemon.favorite && pokemon.name.localizedStandardContains(searchText)
-            } else if !searchText.isEmpty {
-                pokemon.name.localizedStandardContains(searchText)
-            } else if filterByFavorites {
-                pokemon.favorite
-            } else {
-                true
-            }
+            (selectedType == "All" || pokemon.types.contains(selectedType)) &&
+            (!filterByFavorites || pokemon.favorite) &&
+            (searchText.isEmpty || pokemon.name.localizedStandardContains(searchText))
         }
     }
 
@@ -49,21 +51,32 @@ struct ContentView: View {
                     Section  {
                         ForEach((try? pokedex.filter(dynamicPredicate)) ?? pokedex) { pokemon in
                             NavigationLink(value: pokemon) {
-                                if pokemon.sprite == nil {
-                                    AsyncImage(url: pokemon.spriteURL) { image in
-                                        image
+                                Button {
+                                    pokemon.showShiny.toggle()
+                                    do {
+                                        try modelContext.save()
+                                    } catch {
+                                        print(error)
+                                    }
+                                } label: {
+                                    if pokemon.sprite == nil {
+                                        AsyncImage(url: pokemon.showShiny ? pokemon.shinyURL : pokemon.spriteURL) { image in
+                                            image
+                                                .resizable()
+                                                .scaledToFit()
+                                        } placeholder: {
+                                            ProgressView()
+                                        }
+                                        .frame(width: 100, height: 100)
+                                    } else {
+                                        let currentImage = pokemon.showShiny ? pokemon.shinyImage : pokemon.spriteImage
+                                        currentImage
                                             .resizable()
                                             .scaledToFit()
-                                    } placeholder: {
-                                        ProgressView()
+                                            .frame(width: 100, height: 100)
                                     }
-                                    .frame(width: 100, height: 100)
-                                } else {
-                                    pokemon.spriteImage
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 100, height: 100)
                                 }
+                                .buttonStyle(.plain)
                                 
                                 VStack(alignment: .leading) {
                                     HStack {
@@ -137,6 +150,17 @@ struct ContentView: View {
                             Label("Filter by favorites", systemImage: filterByFavorites ? "star.fill" : "star")
                         }
                         .tint(.yellow)
+                    }
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Menu {
+                            Picker("Filter", selection: $selectedType.animation()) {
+                                ForEach(uniqueTypes, id: \.self) { type in
+                                    Text(type.capitalized).tag(type as String?)
+                                }
+                            }
+                        } label: {
+                            Image(systemName: "slider.horizontal.3")
+                        }
                     }
                 }
             }

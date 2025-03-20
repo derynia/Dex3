@@ -14,8 +14,8 @@
             filePath = "Dex3/ContentView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "51"
-            endingLineNumber = "51"
+            startingLineNumber = "53"
+            endingLineNumber = "53"
             landmarkName = "body"
             landmarkType = "24">
          </BreakpointContent>
@@ -34,36 +34,6 @@
             endingLineNumber = "1"
             landmarkName = "dynamicPredicate"
             landmarkType = "37">
-            <Locations>
-               <Location
-                  uuid = "2C1A769F-B204-4FC2-AD37-8984519AFD10 - 6ed83fa041dbdc54"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "Dex3.ContentView.dynamicPredicate.getter : Foundation.Predicate&lt;Pack{Dex3.Pokemon}&gt;"
-                  moduleName = "Dex3.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///var/folders/mt/ttg91xb96bg81l22wnyt5z3h0000gn/T/-2fd209.@__swiftmacro_4Dex30022ContentViewswift_tiAIefMX20_8_33_C02B5303D46C16F7E29236656BF6E781Ll9PredicatefMf_.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "1"
-                  endingLineNumber = "1">
-               </Location>
-               <Location
-                  uuid = "2C1A769F-B204-4FC2-AD37-8984519AFD10 - 8f6a3fe0acebdd52"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #2 (Foundation.PredicateExpressions.Variable&lt;Dex3.Pokemon&gt;) -&gt; any Foundation.StandardPredicateExpression&lt;Self.Foundation.PredicateExpression.Output == Swift.Bool&gt; in Dex3.ContentView.dynamicPredicate.getter : Foundation.Predicate&lt;Pack{Dex3.Pokemon}&gt;"
-                  moduleName = "Dex3.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///var/folders/mt/ttg91xb96bg81l22wnyt5z3h0000gn/T/-2fd209.@__swiftmacro_4Dex30022ContentViewswift_tiAIefMX20_8_33_C02B5303D46C16F7E29236656BF6E781Ll9PredicatefMf_.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "4"
-                  endingLineNumber = "4">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

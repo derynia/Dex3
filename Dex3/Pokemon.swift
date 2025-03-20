@@ -17,6 +17,7 @@ class Pokemon : Decodable {
     var attack: Int = 0
     var defence: Int = 0
     var favorite: Bool = false
+    var showShiny: Bool = false
     var hp: Int = 0
     var id: Int = 0
     var name: String
@@ -28,6 +29,8 @@ class Pokemon : Decodable {
     var sprite: Data?
     var spriteURL: URL
     var types: [String]
+    var allSprites: [URL]
+    var moves: [String]
     
     var background: ImageResource {
         switch types[0] {
@@ -87,6 +90,7 @@ class Pokemon : Decodable {
         case types
         case stats
         case sprites
+        case moves
         
         enum TypeDictionaryKeys: CodingKey {
             case type
@@ -101,9 +105,26 @@ class Pokemon : Decodable {
         }
         
         enum SpriteKeys: String, CodingKey {
-            case spriteURL = "frontDefault"
+            case spriteULR = "frontDefault"
+            case backDefault = "backDefault"
             case shinyURL = "frontShiny"
+            case backShiny = "backShiny"
             
+            case other
+            
+            enum OtherKeys: String, CodingKey {
+                case dreamWorld = "dream_world"
+                case home
+                case officialArtwork = "official-artwork"
+            }
+        }
+        
+        enum MoveDictionaryKeys: CodingKey {
+            case move
+            
+            enum MoveKeys: CodingKey {
+                case name
+            }
         }
     }
     
@@ -141,8 +162,53 @@ class Pokemon : Decodable {
         specialDefence = decodedStats[4]
         speed = decodedStats[5]
         
+        // Decode sprites
         let spritesContainer = try container.nestedContainer(keyedBy: CodingKeys.SpriteKeys.self, forKey: .sprites)
-        spriteURL = try spritesContainer.decode(URL.self, forKey: .spriteURL)
+        
+        spriteURL = try spritesContainer.decode(URL.self, forKey: .spriteULR)
         shinyURL = try spritesContainer.decode(URL.self, forKey: .shinyURL)
+
+        // Collect all non-null sprite URLs
+        var spriteURLs: [URL] = []
+        
+        func addIfPresent(_ key: CodingKeys.SpriteKeys, from container: KeyedDecodingContainer<CodingKeys.SpriteKeys>) {
+            if let url = try? container.decode(URL.self, forKey: key) {
+                spriteURLs.append(url)
+            }
+        }
+        
+        addIfPresent(.spriteULR, from: spritesContainer)
+        addIfPresent(.backDefault, from: spritesContainer)
+        addIfPresent(.shinyURL, from: spritesContainer)
+        addIfPresent(.backShiny, from: spritesContainer)
+
+        // Decode "other" sprites
+        if let otherContainer = try? spritesContainer.nestedContainer(keyedBy: CodingKeys.SpriteKeys.OtherKeys.self, forKey: .other) {
+            
+            func addFromNestedContainer(_ key: CodingKeys.SpriteKeys.OtherKeys) {
+                if let nestedContainer = try? otherContainer.nestedContainer(keyedBy: CodingKeys.SpriteKeys.self, forKey: key) {
+                    addIfPresent(.spriteULR, from: nestedContainer)
+                    addIfPresent(.shinyURL, from: nestedContainer)
+                }
+            }
+            
+            addFromNestedContainer(.dreamWorld)
+            addFromNestedContainer(.home)
+            addFromNestedContainer(.officialArtwork)
+        }
+        
+        // Assign all valid sprite URLs to allSprites
+        allSprites = spriteURLs
+        
+        // Decode moves
+        var extractedMoves: [String] = []
+        var movesContainer = try container.nestedUnkeyedContainer(forKey: .moves)
+        while !movesContainer.isAtEnd {
+            let moveDictionaryContainer = try movesContainer.nestedContainer(keyedBy: CodingKeys.MoveDictionaryKeys.self)
+            let moveContainer = try moveDictionaryContainer.nestedContainer(keyedBy: CodingKeys.MoveDictionaryKeys.MoveKeys.self, forKey: .move)
+            let moveName = try moveContainer.decode(String.self, forKey: .name)
+            extractedMoves.append(moveName)
+        }
+        moves = extractedMoves
     }
 }
